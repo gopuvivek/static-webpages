@@ -6,16 +6,19 @@
     <title>III YR CSE R18 Material</title>
     <!-- Required meta tags always come first -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width">
     <meta http-equiv="x-ua-compatible" content="ie=edge">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css">
     <link href="css/styles.css" rel="stylesheet">
+    <script src="https://kit.fontawesome.com/a4babae835.js" crossorigin="anonymous"></script>
 </head>
 <body>
-    <nav class="navbar navbar-dark navbar-expand-sm fixed-top">
+    <nav class="navbar navbar-dark navbar-expand-sm fixed-top" id="top">
         <div class="container">
+            <a href="./index.html"><i class="fas fa-book-reader fa-3x mr-3 ml-2" style="color: #F4A41C"></i></a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -34,39 +37,276 @@
             <div class="row row-header">
                 <div class="col-12 col-sm-12">
                     <h1>Welcome !</h1>
-                    <h4>You can find all the study material links related to current semester core subjects.</h4>
+                    <h4>You can find below, the study material links related some of the core computer science subjects.</h4>
                 </div>   
             </div>
         </div>
     </header>
     <div class="container">
-         <div class="row row-content align-items-center">
+         <div id="cn" class="row row-content align-items-center">
             <div class="col-12 col-sm-4 col-md-3 order-sm-last">
                 <h2>Computer Networks</h2>
             </div>
             <div class="col col-sm col-md order-sm-first"> 
                 <div>
-                    <h4 class="mt-0">Text Books</h4>
+                    <h4 class="mt-0">Books</h4>
                     <ul class="list-group">
-                      <li class="list-group-item"><a href="http://index-of.es/Varios-2/Computer%20Networks%205th%20Edition.pdf" target="_blank"><em>Computer Networks -- Andrew S Tanenbaum, David. J. Wetherall, 5th Edition. Pearson
-Education/PHI</em></a></li>
-                    </ul>
-                    <h4 class="mt-0">Reference Books</h4>
-                    <ul class="list-group">
-                      <li class="list-group-item"><a href="#"><em>An Engineering Approach to Computer Networks-S. Keshav, 2
-nd Edition, Pearson Education (Unavailable)</em></a></li>
-                      <li class="list-group-item"><a href="http://zai.lecturer.pens.ac.id/Kuliah/Komunikasi%20Data/Buku%20Referensi/Data%20Communications%20and%20Networking%20By%20Behrouz%20A.Forouzan.pdf" target="_blank"><em> Data Communications and Networking – Behrouz A. Forouzan. Third Edition TMH</em></a></li>
+                    <li class="list-group-item">
+                        <div class="media">
+                            <img src="images/david_wetherall.jpg" height="80" width="60" class="mr-3 align-self-center">
+                            <div class="media-body align-self-center">
+                                <a href="http://index-of.es/Varios-2/Computer%20Networks%205th%20Edition.pdf" target="_blank">
+                                    <em>Computer Networks -- Andrew S Tanenbaum, David. J. Wetherall, 5th Edition. Pearson Education/PHI</em>
+                                &nbsp;
+                                    <i class="fa fa-external-link fa-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                        <li class="list-group-item">
+                            <div class="media">
+                                <img src="images/behrouz.jpg" height="80" width="60" class="mr-3 align-self-center">
+                                <div class="media-body align-self-center">
+                                        <a href="http://zai.lecturer.pens.ac.id/Kuliah/Komunikasi%20Data/Buku%20Referensi/Data%20Communications%20and%20Networking%20By%20Behrouz%20A.Forouzan.pdf" target="_blank">
+                                        <em> Data Communications and Networking – Behrouz A. Forouzan. Third Edition TMH</em>
+                                            &nbsp;
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                        </a>
+                                </div>
+                            </div>
+                        </li>
                     </ul>
                     <h4 class="mt-0">Video Links</h4>
                     <ul class="list-group">
-                      <li class="list-group-item"><a href="https://media.pearsoncmg.com/ph/streaming/esm/tanenbaum5e_videonotes/tanenbaum_videoNotes.html" target="_blank"><em>Video Explanations by David. J. Wetherall Co Author of Computer Networks (Very Helpful)</em></a></li>
+                      <li class="list-group-item">
+                        <div class="media">
+                                <div class="media-body align-self-center">
+                                    <a href="https://media.pearsoncmg.com/ph/streaming/esm/tanenbaum5e_videonotes/tanenbaum_videoNotes.html" target="_blank">
+                                            <i class="fa fa-play fa-lg">    
+                                        </i> &nbsp;&nbsp;
+                                        <em>Video Explanations by David. J. Wetherall Co Author of Computer Networks (Very Helpful)</em>
+                                    </a>
+                                </div>
+                                 <img class="ml-0" src="images/pearson.JPG" height="28" width="90" class="ml-3 align-self-center">
+                            </div>
+                        
+
+                      </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="se" class="row row-content align-items-center">
+            <div class="col-12 col-sm-4 col-md-3 order-sm-last">
+                <h2>Software Engineering</h2>
+            </div>
+            <div class="col col-sm col-md order-sm-last"> 
+                <div>
+                    <h4 class="mt-0">Books</h4>
+                    <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="media">
+                            <img src="images/sommerville.jpg" height="80" width="60" class="mr-3 align-self-center">
+                            <div class="media-body align-self-center">
+                                <a href="https://pdf.zlibcdn.com/dtoken/7a0591c4b55e77db69753b2586f715eb/Software_engineering_by_Ian_Sommerville)_2053870_(z-lib.org).pdf" target="_blank">
+                                    <em>Software Engineering- Sommerville, 7th edition, Pearson Education.</em>
+                                &nbsp;
+                                    <i class="fa fa-external-link fa-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                        <li class="list-group-item">
+                            <div class="media">
+                                <img src="images/roger-pressman.jpg" height="80" width="60" class="mr-3 align-self-center">
+                                <div class="media-body align-self-center">
+                                        <a href="https://whyphi.staff.telkomuniversity.ac.id/files/2016/01/ebook-pressman-sw-engineering.pdf" target="_blank">
+                                        <em>Software Engineering, A practitioner’s Approach- Roger S. Pressman, 6th edition, Mc Graw Hill International Edition.</em>
+                                            &nbsp;
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                        </a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <h4 class="mt-0">Video Links</h4>
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <div class="media">
+                                <div class="media-body align-self-center">
+                                    <a href="https://www.youtube.com/playlist?list=PLEdmaLOtiZFvejqJoZ_iJIsoQwQtMRUEy" target="_blank">
+                                            <i class="fa fa-play fa-lg">    
+                                        </i> &nbsp;&nbsp;
+                                        <em>Software Engineering -- IIT Bombay (Through NPTEL)</em>
+                                    </a>
+                                </div>
+                                 <img src="images/nptel.jpg" width="120" height="35">
+                            </div>
+                      </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="wt" class="row row-content align-items-center">
+            <div class="col-12 col-sm-4 col-md-3 order-sm-last">
+                <h2>Web Technologies</h2>
+            </div>
+            <div class="col col-sm col-md order-sm-first"> 
+                <div>
+                    <h4 class="mt-0">Books</h4>
+                    <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="media">
+                            <img src="images/chris.jpg" height="80" width="60" class="mr-3 align-self-center">
+                            <div class="media-body align-self-center">
+                                <a href="https://pdf.zlibcdn.com/dtoken/6cd7ec0fc9e13174cf153dc7b184ca7b/Web_Programming_Building_Internet_Applications_by_3351374_(z-lib.org).pdf" target="_blank">
+                                    <em>Web Programming, building internet applications, Chris Bates 2″ edition, Wiley Dreamtech </em>
+                                &nbsp;
+                                    <i class="fa fa-external-link fa-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                        <li class="list-group-item">
+                            <div class="media">
+                                <img src="images/hans-bergsten.jpg" height="80" width="60" class="mr-3 align-self-center">
+                                <div class="media-body align-self-center">
+                                        <a href="https://whyphi.staff.telkomuniversity.ac.id/files/2016/01/ebook-pressman-sw-engineering.pdf" target="_blank">
+                                        <em>Java Server Pages — Hans Bergsten, SPD O’Reilly.</em>
+                                            &nbsp;
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                        </a>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <div class="media">
+                                <img src="images/duckett.jpg" height="80" width="60" class="mr-3 align-self-center">
+                                <div class="media-body align-self-center">
+                                        <a href="images/others/" target="_blank">
+                                        <em>Beginning Web Programming with HTML, XHTML, and CSS - Jon Duckett, WROX.</em>
+                                            &nbsp;
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                        </a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <h4 class="mt-0">Web Links</h4>
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <div class="media">
+                                <div class="media-body align-self-center">
+                                    <img src="images/jsinfo.jpg" width="140" height="35">
+                                    <a href="https://javascript.info/first-steps" target="_blank">
+                                         &nbsp;&nbsp;
+                                        <em>Complete Reference for JavaScript Online</em>
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                    </a>
+                                </div>
+                                 
+                            </div>
+                      </li>
+                      <li class="list-group-item">
+                          <div class="media">
+                                <div class="media-body align-self-center">
+                                    <img src="images/w3schools.jpg" width="140" height="35">
+                                    <a href="https://www.w3schools.com/" target="_blank">
+                                         &nbsp;&nbsp;
+                                        <em>A popular site with tutorials on wide variety of web development languages.</em>
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                      </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div id="flat" class="row row-content align-items-center">
+            <div class="col-12 col-sm-4 col-md-3 order-sm-last">
+                <h2>Formal Languages and Automata Theory</h2>
+            </div>
+            <div class="col col-sm col-md order-sm-last"> 
+                <div>
+                    <h4 class="mt-0">Books</h4>
+                    <ul class="list-group">
+                    <li class="list-group-item">
+                        <div class="media">
+                            <img src="images/ullman.jpg" height="80" width="60" class="mr-3 align-self-center">
+                            <div class="media-body align-self-center">
+                                <a href="http://ce.sharif.edu/courses/94-95/1/ce414-2/resources/root/Text%20Books/Automata/John%20E.%20Hopcroft,%20Rajeev%20Motwani,%20Jeffrey%20D.%20Ullman-Introduction%20to%20Automata%20Theory,%20Languages,%20and%20Computations-Prentice%20Hall%20(2006).pdf" target="_blank">
+                                    <em>Introduction to Automata Theory, Languages, and Computation, 3nd Edition, John E. Hopcroft, Rajeev Motwani, Jeffrey D. Ullman, Pearson Education.</em>
+                                &nbsp;
+                                    <i class="fa fa-external-link fa-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </li>
+                        <li class="list-group-item">
+                            <div class="media">
+                                <img src="images/mishra.jpg" height="80" width="60" class="mr-3 align-self-center">
+                                <div class="media-body align-self-center">
+                                        <a href="https://pdfs.semanticscholar.org/3e02/7d7747616af5fb0b0b66f18898f212b9ccd2.pdf" target="_blank">
+                                        <em>Theory of Computer Science – Automata languages and computation, Mishra and Chandrashekaran, 2nd edition, PHI.</em>
+                                            &nbsp;
+                                        <i class="fa fa-external-link fa-lg"></i>
+                                        </a>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <h4 class="mt-0">Video Links</h4>
+                    <ul class="list-group">
+                      <li class="list-group-item">
+                        <div class="media">
+                                <div class="media-body align-self-center">
+                                    <a href="https://www.youtube.com/playlist?list=PL85CF9F4A047C7BF7" target="_blank">
+                                            <i class="fa fa-play fa-lg">    
+                                        </i> &nbsp;&nbsp;
+                                        <em>Theory of Automata, Formal Languages and Computation by Prof.Kamala Krithivasan, IIT Madras</em>
+                                    </a>
+                                </div>
+                                 <img src="images/nptel.jpg" width="120" height="35">
+                            </div>
+                      </li>
+                      <li class="list-group-item">
+                        <div class="media">
+                                <div class="media-body align-self-center">
+                                    <a href="https://www.youtube.com/playlist?list=PLbMVogVj5nJSd25WnSU144ZyGmsqjuKr3" target="_blank">
+                                            <i class="fa fa-play fa-lg">    
+                                        </i> &nbsp;&nbsp;
+                                        <em>Theory of Computation by Prof. Somenath Biswas, IIT Kanpur</em>
+                                    </a>
+                                </div>
+                                 <img src="images/nptel.jpg" width="120" height="35">
+                            </div>
+                      </li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 </body>
-
+<footer class="footer">
+        <div class="container">
+            <div class="row">             
+                <div class="offsetcol-4">
+                    Thank You for visiting the page!
+                    <div>
+                        <em>*This page was developed by using Bootstrap</em>
+                    </div>
+                </div>
+                 <div class="col-4 align-self-center">
+                    To get the source of the page, <a href="https://github.com/gopuvivek/Static-Pages-Project">click here.</a>
+                </div>
+                <div class="col-4 align-self-center">
+                    <a href="#top" style="color: #110000">Go to Top</a>
+                </div>
+           </div>
+          
+        </div>
+    </footer>
     <script src="jquery/dist/jquery.slim.min.js"></script>
     <script src="popper.js/dist/umd/popper.min.js"></script>
     <script src="bootstrap/dist/js/bootstrap.min.js"></script>
