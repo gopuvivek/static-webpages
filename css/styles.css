@@ -37,7 +37,12 @@ body {
   min-height: 400px; 
   background-color: #F4A41C;
 }
-
+.goog-te-banner-frame.skiptranslate {
+    display: none !important;
+    } 
+body {
+    top: 0px !important; 
+    }
 .list-group-item{
   background-color: #143D59;
   margin: 10px 0px 10px 0px;
@@ -45,6 +50,7 @@ body {
 .list-group-item a{
   text-decoration:none;
 }
+
 #navbar
 {
   text-align: center;
@@ -58,4 +64,8 @@ body {
 }
 .nav-link:hover {
   background-color: #F4A41C;
+}
+
+#google_translate_element
+{
 }
