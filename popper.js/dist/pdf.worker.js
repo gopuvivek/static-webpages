@@ -1,25 +1,3 @@
-/**
- * @licstart The following is the entire license notice for the
- * JavaScript code in this page
- *
- * Copyright 2023 Mozilla Foundation
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- *
- * @licend The above is the entire license notice for the
- * JavaScript code in this page
- */
-
 (function webpackUniversalModuleDefinition(root, factory) {
     if (typeof exports === 'object' && typeof module === 'object')
         module.exports = factory();
@@ -30,618 +8,605 @@
     else
         root["pdfjs-dist/build/pdf.worker"] = root.pdfjsWorker = factory();
 })(globalThis, () => {
-    return /******/ (() => { // webpackBootstrap
-/******/ 	"use strict";
-/******/ 	var __webpack_modules__ = ([
-/* 0 */,
-/* 1 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
-
-
-
-                Object.defineProperty(exports, "__esModule", ({
-                    value: true
-                }));
-                exports.WorkerTask = exports.WorkerMessageHandler = void 0;
-                var _util = __w_pdfjs_require__(2);
-                var _core_utils = __w_pdfjs_require__(3);
-                var _primitives = __w_pdfjs_require__(4);
-                var _pdf_manager = __w_pdfjs_require__(6);
-                var _cleanup_helper = __w_pdfjs_require__(69);
-                var _writer = __w_pdfjs_require__(63);
-                var _is_node = __w_pdfjs_require__(100);
-                var _message_handler = __w_pdfjs_require__(101);
-                var _worker_stream = __w_pdfjs_require__(102);
-                class WorkerTask {
-                    constructor(name) {
-                        this.name = name;
-                        this.terminated = false;
-                        this._capability = (0, _util.createPromiseCapability)();
-                    }
-                    get finished() {
-                        return this._capability.promise;
-                    }
-                    finish() {
-                        this._capability.resolve();
-                    }
-                    terminate() {
-                        this.terminated = true;
-                    }
-                    ensureNotTerminated() {
-                        if (this.terminated) {
-                            throw new Error("Worker task was terminated");
-                        }
+    return (() => {
+        "use strict";
+        var __webpack_modules__ = ([, ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+            Object.defineProperty(exports, "__esModule", ({
+                value: true
+            }));
+            exports.WorkerTask = exports.WorkerMessageHandler = void 0;
+            var _util = __w_pdfjs_require__(2);
+            var _core_utils = __w_pdfjs_require__(3);
+            var _primitives = __w_pdfjs_require__(4);
+            var _pdf_manager = __w_pdfjs_require__(6);
+            var _cleanup_helper = __w_pdfjs_require__(69);
+            var _writer = __w_pdfjs_require__(63);
+            var _is_node = __w_pdfjs_require__(100);
+            var _message_handler = __w_pdfjs_require__(101);
+            var _worker_stream = __w_pdfjs_require__(102);
+            class WorkerTask {
+                constructor(name) {
+                    this.name = name;
+                    this.terminated = false;
+                    this._capability = (0, _util.createPromiseCapability)();
+                }
+                get finished() {
+                    return this._capability.promise;
+                }
+                finish() {
+                    this._capability.resolve();
+                }
+                terminate() {
+                    this.terminated = true;
+                }
+                ensureNotTerminated() {
+                    if (this.terminated) {
+                        throw new Error("Worker task was terminated");
                     }
                 }
-                exports.WorkerTask = WorkerTask;
-                class WorkerMessageHandler {
-                    static setup(handler, port) {
-                        let testMessageProcessed = false;
-                        handler.on("test", function (data) {
-                            if (testMessageProcessed) {
-                                return;
-                            }
-                            testMessageProcessed = true;
-                            handler.send("test", data instanceof Uint8Array);
-                        });
-                        handler.on("configure", function (data) {
-                            (0, _util.setVerbosityLevel)(data.verbosity);
-                        });
-                        handler.on("GetDocRequest", function (data) {
-                            return WorkerMessageHandler.createDocumentHandler(data, port);
-                        });
+            }
+            exports.WorkerTask = WorkerTask;
+            class WorkerMessageHandler {
+                static setup(handler, port) {
+                    let testMessageProcessed = false;
+                    handler.on("test", function (data) {
+                        if (testMessageProcessed) {
+                            return;
+                        }
+                        testMessageProcessed = true;
+                        handler.send("test", data instanceof Uint8Array);
+                    });
+                    handler.on("configure", function (data) {
+                        (0, _util.setVerbosityLevel)(data.verbosity);
+                    });
+                    handler.on("GetDocRequest", function (data) {
+                        return WorkerMessageHandler.createDocumentHandler(data, port);
+                    });
+                }
+                static createDocumentHandler(docParams, port) {
+                    let pdfManager;
+                    let terminated = false;
+                    let cancelXHRs = null;
+                    const WorkerTasks = new Set();
+                    const verbosity = (0, _util.getVerbosityLevel)();
+                    const {
+                        docId,
+                        apiVersion
+                    } = docParams;
+                    const workerVersion = '3.4.120';
+                    if (apiVersion !== workerVersion) {
+                        throw new Error(`The API version "${apiVersion}" does not match ` + `the Worker version "${workerVersion}".`);
                     }
-                    static createDocumentHandler(docParams, port) {
-                        let pdfManager;
-                        let terminated = false;
-                        let cancelXHRs = null;
-                        const WorkerTasks = new Set();
-                        const verbosity = (0, _util.getVerbosityLevel)();
-                        const {
-                            docId,
-                            apiVersion
-                        } = docParams;
-                        const workerVersion = '3.4.120';
-                        if (apiVersion !== workerVersion) {
-                            throw new Error(`The API version "${apiVersion}" does not match ` + `the Worker version "${workerVersion}".`);
+                    const enumerableProperties = [];
+                    for (const property in []) {
+                        enumerableProperties.push(property);
+                    }
+                    if (enumerableProperties.length) {
+                        throw new Error("The `Array.prototype` contains unexpected enumerable properties: " + enumerableProperties.join(", ") + "; thus breaking e.g. `for...in` iteration of `Array`s.");
+                    }
+                    if (typeof ReadableStream === "undefined") {
+                        const partialMsg = "The browser/environment lacks native support for critical " + "functionality used by the PDF.js library (e.g. `ReadableStream`); ";
+                        if (_is_node.isNodeJS) {
+                            throw new Error(partialMsg + "please use a `legacy`-build instead.");
                         }
-                        const enumerableProperties = [];
-                        for (const property in []) {
-                            enumerableProperties.push(property);
+                        throw new Error(partialMsg + "please update to a supported browser.");
+                    }
+                    const workerHandlerName = docId + "_worker";
+                    let handler = new _message_handler.MessageHandler(workerHandlerName, docId, port);
+                    function ensureNotTerminated() {
+                        if (terminated) {
+                            throw new Error("Worker was terminated");
                         }
-                        if (enumerableProperties.length) {
-                            throw new Error("The `Array.prototype` contains unexpected enumerable properties: " + enumerableProperties.join(", ") + "; thus breaking e.g. `for...in` iteration of `Array`s.");
+                    }
+                    function startWorkerTask(task) {
+                        WorkerTasks.add(task);
+                    }
+                    function finishWorkerTask(task) {
+                        task.finish();
+                        WorkerTasks.delete(task);
+                    }
+                    async function loadDocument(recoveryMode) {
+                        await pdfManager.ensureDoc("checkHeader");
+                        await pdfManager.ensureDoc("parseStartXRef");
+                        await pdfManager.ensureDoc("parse", [recoveryMode]);
+                        await pdfManager.ensureDoc("checkFirstPage", [recoveryMode]);
+                        await pdfManager.ensureDoc("checkLastPage", [recoveryMode]);
+                        const isPureXfa = await pdfManager.ensureDoc("isPureXfa");
+                        if (isPureXfa) {
+                            const task = new WorkerTask("loadXfaFonts");
+                            startWorkerTask(task);
+                            await Promise.all([pdfManager.loadXfaFonts(handler, task).catch(reason => { }).then(() => finishWorkerTask(task)), pdfManager.loadXfaImages()]);
                         }
-                        if (typeof ReadableStream === "undefined") {
-                            const partialMsg = "The browser/environment lacks native support for critical " + "functionality used by the PDF.js library (e.g. `ReadableStream`); ";
-                            if (_is_node.isNodeJS) {
-                                throw new Error(partialMsg + "please use a `legacy`-build instead.");
-                            }
-                            throw new Error(partialMsg + "please update to a supported browser.");
-                        }
-                        const workerHandlerName = docId + "_worker";
-                        let handler = new _message_handler.MessageHandler(workerHandlerName, docId, port);
-                        function ensureNotTerminated() {
-                            if (terminated) {
-                                throw new Error("Worker was terminated");
-                            }
-                        }
-                        function startWorkerTask(task) {
-                            WorkerTasks.add(task);
-                        }
-                        function finishWorkerTask(task) {
-                            task.finish();
-                            WorkerTasks.delete(task);
-                        }
-                        async function loadDocument(recoveryMode) {
-                            await pdfManager.ensureDoc("checkHeader");
-                            await pdfManager.ensureDoc("parseStartXRef");
-                            await pdfManager.ensureDoc("parse", [recoveryMode]);
-                            await pdfManager.ensureDoc("checkFirstPage", [recoveryMode]);
-                            await pdfManager.ensureDoc("checkLastPage", [recoveryMode]);
-                            const isPureXfa = await pdfManager.ensureDoc("isPureXfa");
-                            if (isPureXfa) {
-                                const task = new WorkerTask("loadXfaFonts");
-                                startWorkerTask(task);
-                                await Promise.all([pdfManager.loadXfaFonts(handler, task).catch(reason => { }).then(() => finishWorkerTask(task)), pdfManager.loadXfaImages()]);
-                            }
-                            const [numPages, fingerprints] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints")]);
-                            const htmlForXfa = isPureXfa ? await pdfManager.ensureDoc("htmlForXfa") : null;
-                            return {
-                                numPages,
-                                fingerprints,
-                                htmlForXfa
-                            };
-                        }
-                        function getPdfManager({
-                            data,
-                            password,
+                        const [numPages, fingerprints] = await Promise.all([pdfManager.ensureDoc("numPages"), pdfManager.ensureDoc("fingerprints")]);
+                        const htmlForXfa = isPureXfa ? await pdfManager.ensureDoc("htmlForXfa") : null;
+                        return {
+                            numPages,
+                            fingerprints,
+                            htmlForXfa
+                        };
+                    }
+                    function getPdfManager({
+                        data,
+                        password,
+                        disableAutoFetch,
+                        rangeChunkSize,
+                        length,
+                        docBaseUrl,
+                        enableXfa,
+                        evaluatorOptions
+                    }) {
+                        const pdfManagerArgs = {
+                            source: null,
                             disableAutoFetch,
-                            rangeChunkSize,
-                            length,
                             docBaseUrl,
+                            docId,
                             enableXfa,
-                            evaluatorOptions
-                        }) {
-                            const pdfManagerArgs = {
-                                source: null,
-                                disableAutoFetch,
-                                docBaseUrl,
-                                docId,
-                                enableXfa,
-                                evaluatorOptions,
-                                handler,
-                                length,
-                                password,
-                                rangeChunkSize
-                            };
-                            const pdfManagerCapability = (0, _util.createPromiseCapability)();
-                            let newPdfManager;
-                            if (data) {
-                                try {
-                                    pdfManagerArgs.source = data;
-                                    newPdfManager = new _pdf_manager.LocalPdfManager(pdfManagerArgs);
-                                    pdfManagerCapability.resolve(newPdfManager);
-                                } catch (ex) {
-                                    pdfManagerCapability.reject(ex);
-                                }
-                                return pdfManagerCapability.promise;
-                            }
-                            let pdfStream,
-                                cachedChunks = [];
+                            evaluatorOptions,
+                            handler,
+                            length,
+                            password,
+                            rangeChunkSize
+                        };
+                        const pdfManagerCapability = (0, _util.createPromiseCapability)();
+                        let newPdfManager;
+                        if (data) {
                             try {
-                                pdfStream = new _worker_stream.PDFWorkerStream(handler);
+                                pdfManagerArgs.source = data;
+                                newPdfManager = new _pdf_manager.LocalPdfManager(pdfManagerArgs);
+                                pdfManagerCapability.resolve(newPdfManager);
                             } catch (ex) {
                                 pdfManagerCapability.reject(ex);
-                                return pdfManagerCapability.promise;
                             }
-                            const fullRequest = pdfStream.getFullReader();
-                            fullRequest.headersReady.then(function () {
-                                if (!fullRequest.isRangeSupported) {
-                                    return;
-                                }
-                                pdfManagerArgs.source = pdfStream;
-                                pdfManagerArgs.length = fullRequest.contentLength;
-                                pdfManagerArgs.disableAutoFetch = pdfManagerArgs.disableAutoFetch || fullRequest.isStreamingSupported;
-                                newPdfManager = new _pdf_manager.NetworkPdfManager(pdfManagerArgs);
-                                for (const chunk of cachedChunks) {
-                                    newPdfManager.sendProgressiveData(chunk);
-                                }
-                                cachedChunks = [];
-                                pdfManagerCapability.resolve(newPdfManager);
-                                cancelXHRs = null;
-                            }).catch(function (reason) {
-                                pdfManagerCapability.reject(reason);
-                                cancelXHRs = null;
-                            });
-                            let loaded = 0;
-                            const flushChunks = function () {
-                                const pdfFile = (0, _core_utils.arrayBuffersToBytes)(cachedChunks);
-                                if (length && pdfFile.length !== length) {
-                                    (0, _util.warn)("reported HTTP length is different from actual");
-                                }
-                                try {
-                                    pdfManagerArgs.source = pdfFile;
-                                    newPdfManager = new _pdf_manager.LocalPdfManager(pdfManagerArgs);
-                                    pdfManagerCapability.resolve(newPdfManager);
-                                } catch (ex) {
-                                    pdfManagerCapability.reject(ex);
-                                }
-                                cachedChunks = [];
-                            };
-                            new Promise(function (resolve, reject) {
-                                const readChunk = function ({
-                                    value,
-                                    done
-                                }) {
-                                    try {
-                                        ensureNotTerminated();
-                                        if (done) {
-                                            if (!newPdfManager) {
-                                                flushChunks();
-                                            }
-                                            cancelXHRs = null;
-                                            return;
-                                        }
-                                        loaded += value.byteLength;
-                                        if (!fullRequest.isStreamingSupported) {
-                                            handler.send("DocProgress", {
-                                                loaded,
-                                                total: Math.max(loaded, fullRequest.contentLength || 0)
-                                            });
-                                        }
-                                        if (newPdfManager) {
-                                            newPdfManager.sendProgressiveData(value);
-                                        } else {
-                                            cachedChunks.push(value);
-                                        }
-                                        fullRequest.read().then(readChunk, reject);
-                                    } catch (e) {
-                                        reject(e);
-                                    }
-                                };
-                                fullRequest.read().then(readChunk, reject);
-                            }).catch(function (e) {
-                                pdfManagerCapability.reject(e);
-                                cancelXHRs = null;
-                            });
-                            cancelXHRs = function (reason) {
-                                pdfStream.cancelAllRequests(reason);
-                            };
                             return pdfManagerCapability.promise;
                         }
-                        function setupDoc(data) {
-                            function onSuccess(doc) {
-                                ensureNotTerminated();
-                                handler.send("GetDoc", {
-                                    pdfInfo: doc
-                                });
-                            }
-                            function onFailure(ex) {
-                                ensureNotTerminated();
-                                if (ex instanceof _util.PasswordException) {
-                                    const task = new WorkerTask(`PasswordException: response ${ex.code}`);
-                                    startWorkerTask(task);
-                                    handler.sendWithPromise("PasswordRequest", ex).then(function ({
-                                        password
-                                    }) {
-                                        finishWorkerTask(task);
-                                        pdfManager.updatePassword(password);
-                                        pdfManagerReady();
-                                    }).catch(function () {
-                                        finishWorkerTask(task);
-                                        handler.send("DocException", ex);
-                                    });
-                                } else if (ex instanceof _util.InvalidPDFException || ex instanceof _util.MissingPDFException || ex instanceof _util.UnexpectedResponseException || ex instanceof _util.UnknownErrorException) {
-                                    handler.send("DocException", ex);
-                                } else {
-                                    handler.send("DocException", new _util.UnknownErrorException(ex.message, ex.toString()));
-                                }
-                            }
-                            function pdfManagerReady() {
-                                ensureNotTerminated();
-                                loadDocument(false).then(onSuccess, function (reason) {
-                                    ensureNotTerminated();
-                                    if (!(reason instanceof _core_utils.XRefParseException)) {
-                                        onFailure(reason);
-                                        return;
-                                    }
-                                    pdfManager.requestLoadedStream().then(function () {
-                                        ensureNotTerminated();
-                                        loadDocument(true).then(onSuccess, onFailure);
-                                    });
-                                });
-                            }
-                            ensureNotTerminated();
-                            getPdfManager(data).then(function (newPdfManager) {
-                                if (terminated) {
-                                    newPdfManager.terminate(new _util.AbortException("Worker was terminated."));
-                                    throw new Error("Worker was terminated");
-                                }
-                                pdfManager = newPdfManager;
-                                pdfManager.requestLoadedStream(true).then(stream => {
-                                    handler.send("DataLoaded", {
-                                        length: stream.bytes.byteLength
-                                    });
-                                });
-                            }).then(pdfManagerReady, onFailure);
+                        let pdfStream,
+                            cachedChunks = [];
+                        try {
+                            pdfStream = new _worker_stream.PDFWorkerStream(handler);
+                        } catch (ex) {
+                            pdfManagerCapability.reject(ex);
+                            return pdfManagerCapability.promise;
                         }
-                        handler.on("GetPage", function (data) {
-                            return pdfManager.getPage(data.pageIndex).then(function (page) {
-                                return Promise.all([pdfManager.ensure(page, "rotate"), pdfManager.ensure(page, "ref"), pdfManager.ensure(page, "userUnit"), pdfManager.ensure(page, "view")]).then(function ([rotate, ref, userUnit, view]) {
-                                    return {
-                                        rotate,
-                                        ref,
-                                        userUnit,
-                                        view
-                                    };
-                                });
-                            });
-                        });
-                        handler.on("GetPageIndex", function (data) {
-                            const pageRef = _primitives.Ref.get(data.num, data.gen);
-                            return pdfManager.ensureCatalog("getPageIndex", [pageRef]);
-                        });
-                        handler.on("GetDestinations", function (data) {
-                            return pdfManager.ensureCatalog("destinations");
-                        });
-                        handler.on("GetDestination", function (data) {
-                            return pdfManager.ensureCatalog("getDestination", [data.id]);
-                        });
-                        handler.on("GetPageLabels", function (data) {
-                            return pdfManager.ensureCatalog("pageLabels");
-                        });
-                        handler.on("GetPageLayout", function (data) {
-                            return pdfManager.ensureCatalog("pageLayout");
-                        });
-                        handler.on("GetPageMode", function (data) {
-                            return pdfManager.ensureCatalog("pageMode");
-                        });
-                        handler.on("GetViewerPreferences", function (data) {
-                            return pdfManager.ensureCatalog("viewerPreferences");
-                        });
-                        handler.on("GetOpenAction", function (data) {
-                            return pdfManager.ensureCatalog("openAction");
-                        });
-                        handler.on("GetAttachments", function (data) {
-                            return pdfManager.ensureCatalog("attachments");
-                        });
-                        handler.on("GetJavaScript", function (data) {
-                            return pdfManager.ensureCatalog("javaScript");
-                        });
-                        handler.on("GetDocJSActions", function (data) {
-                            return pdfManager.ensureCatalog("jsActions");
-                        });
-                        handler.on("GetPageJSActions", function ({
-                            pageIndex
-                        }) {
-                            return pdfManager.getPage(pageIndex).then(function (page) {
-                                return pdfManager.ensure(page, "jsActions");
-                            });
-                        });
-                        handler.on("GetOutline", function (data) {
-                            return pdfManager.ensureCatalog("documentOutline");
-                        });
-                        handler.on("GetOptionalContentConfig", function (data) {
-                            return pdfManager.ensureCatalog("optionalContentConfig");
-                        });
-                        handler.on("GetPermissions", function (data) {
-                            return pdfManager.ensureCatalog("permissions");
-                        });
-                        handler.on("GetMetadata", function (data) {
-                            return Promise.all([pdfManager.ensureDoc("documentInfo"), pdfManager.ensureCatalog("metadata")]);
-                        });
-                        handler.on("GetMarkInfo", function (data) {
-                            return pdfManager.ensureCatalog("markInfo");
-                        });
-                        handler.on("GetData", function (data) {
-                            return pdfManager.requestLoadedStream().then(function (stream) {
-                                return stream.bytes;
-                            });
-                        });
-                        handler.on("GetAnnotations", function ({
-                            pageIndex,
-                            intent
-                        }) {
-                            return pdfManager.getPage(pageIndex).then(function (page) {
-                                const task = new WorkerTask(`GetAnnotations: page ${pageIndex}`);
-                                startWorkerTask(task);
-                                return page.getAnnotationsData(handler, task, intent).then(data => {
-                                    finishWorkerTask(task);
-                                    return data;
-                                }, reason => {
-                                    finishWorkerTask(task);
-                                    throw reason;
-                                });
-                            });
-                        });
-                        handler.on("GetFieldObjects", function (data) {
-                            return pdfManager.ensureDoc("fieldObjects");
-                        });
-                        handler.on("HasJSActions", function (data) {
-                            return pdfManager.ensureDoc("hasJSActions");
-                        });
-                        handler.on("GetCalculationOrderIds", function (data) {
-                            return pdfManager.ensureDoc("calculationOrderIds");
-                        });
-                        handler.on("SaveDocument", function ({
-                            isPureXfa,
-                            numPages,
-                            annotationStorage,
-                            filename
-                        }) {
-                            const promises = [pdfManager.requestLoadedStream(), pdfManager.ensureCatalog("acroForm"), pdfManager.ensureCatalog("acroFormRef"), pdfManager.ensureDoc("xref"), pdfManager.ensureDoc("startXRef")];
-                            const newAnnotationsByPage = !isPureXfa ? (0, _core_utils.getNewAnnotationsMap)(annotationStorage) : null;
-                            if (newAnnotationsByPage) {
-                                for (const [pageIndex, annotations] of newAnnotationsByPage) {
-                                    promises.push(pdfManager.getPage(pageIndex).then(page => {
-                                        const task = new WorkerTask(`Save (editor): page ${pageIndex}`);
-                                        return page.saveNewAnnotations(handler, task, annotations).finally(function () {
-                                            finishWorkerTask(task);
-                                        });
-                                    }));
-                                }
+                        const fullRequest = pdfStream.getFullReader();
+                        fullRequest.headersReady.then(function () {
+                            if (!fullRequest.isRangeSupported) {
+                                return;
                             }
-                            if (isPureXfa) {
-                                promises.push(pdfManager.serializeXfaData(annotationStorage));
-                            } else {
-                                for (let pageIndex = 0; pageIndex < numPages; pageIndex++) {
-                                    promises.push(pdfManager.getPage(pageIndex).then(function (page) {
-                                        const task = new WorkerTask(`Save: page ${pageIndex}`);
-                                        return page.save(handler, task, annotationStorage).finally(function () {
-                                            finishWorkerTask(task);
-                                        });
-                                    }));
-                                }
+                            pdfManagerArgs.source = pdfStream;
+                            pdfManagerArgs.length = fullRequest.contentLength;
+                            pdfManagerArgs.disableAutoFetch = pdfManagerArgs.disableAutoFetch || fullRequest.isStreamingSupported;
+                            newPdfManager = new _pdf_manager.NetworkPdfManager(pdfManagerArgs);
+                            for (const chunk of cachedChunks) {
+                                newPdfManager.sendProgressiveData(chunk);
                             }
-                            return Promise.all(promises).then(function ([stream, acroForm, acroFormRef, xref, startXRef, ...refs]) {
-                                let newRefs = [];
-                                let xfaData = null;
-                                if (isPureXfa) {
-                                    xfaData = refs[0];
-                                    if (!xfaData) {
-                                        return stream.bytes;
-                                    }
-                                } else {
-                                    newRefs = refs.flat(2);
-                                    if (newRefs.length === 0) {
-                                        return stream.bytes;
-                                    }
-                                }
-                                const needAppearances = acroFormRef && acroForm instanceof _primitives.Dict && newRefs.some(ref => ref.needAppearances);
-                                const xfa = acroForm instanceof _primitives.Dict && acroForm.get("XFA") || null;
-                                let xfaDatasetsRef = null;
-                                let hasXfaDatasetsEntry = false;
-                                if (Array.isArray(xfa)) {
-                                    for (let i = 0, ii = xfa.length; i < ii; i += 2) {
-                                        if (xfa[i] === "datasets") {
-                                            xfaDatasetsRef = xfa[i + 1];
-                                            hasXfaDatasetsEntry = true;
-                                        }
-                                    }
-                                    if (xfaDatasetsRef === null) {
-                                        xfaDatasetsRef = xref.getNewTemporaryRef();
-                                    }
-                                } else if (xfa) {
-                                    (0, _util.warn)("Unsupported XFA type.");
-                                }
-                                let newXrefInfo = Object.create(null);
-                                if (xref.trailer) {
-                                    const infoObj = Object.create(null);
-                                    const xrefInfo = xref.trailer.get("Info") || null;
-                                    if (xrefInfo instanceof _primitives.Dict) {
-                                        xrefInfo.forEach((key, value) => {
-                                            if (typeof value === "string") {
-                                                infoObj[key] = (0, _util.stringToPDFString)(value);
-                                            }
-                                        });
-                                    }
-                                    newXrefInfo = {
-                                        rootRef: xref.trailer.getRaw("Root") || null,
-                                        encryptRef: xref.trailer.getRaw("Encrypt") || null,
-                                        newRef: xref.getNewTemporaryRef(),
-                                        infoRef: xref.trailer.getRaw("Info") || null,
-                                        info: infoObj,
-                                        fileIds: xref.trailer.get("ID") || null,
-                                        startXRef,
-                                        filename
-                                    };
-                                }
+                            cachedChunks = [];
+                            pdfManagerCapability.resolve(newPdfManager);
+                            cancelXHRs = null;
+                        }).catch(function (reason) {
+                            pdfManagerCapability.reject(reason);
+                            cancelXHRs = null;
+                        });
+                        let loaded = 0;
+                        const flushChunks = function () {
+                            const pdfFile = (0, _core_utils.arrayBuffersToBytes)(cachedChunks);
+                            if (length && pdfFile.length !== length) {
+                                (0, _util.warn)("reported HTTP length is different from actual");
+                            }
+                            try {
+                                pdfManagerArgs.source = pdfFile;
+                                newPdfManager = new _pdf_manager.LocalPdfManager(pdfManagerArgs);
+                                pdfManagerCapability.resolve(newPdfManager);
+                            } catch (ex) {
+                                pdfManagerCapability.reject(ex);
+                            }
+                            cachedChunks = [];
+                        };
+                        new Promise(function (resolve, reject) {
+                            const readChunk = function ({
+                                value,
+                                done
+                            }) {
                                 try {
-                                    return (0, _writer.incrementalUpdate)({
-                                        originalData: stream.bytes,
-                                        xrefInfo: newXrefInfo,
-                                        newRefs,
-                                        xref,
-                                        hasXfa: !!xfa,
-                                        xfaDatasetsRef,
-                                        hasXfaDatasetsEntry,
-                                        needAppearances,
-                                        acroFormRef,
-                                        acroForm,
-                                        xfaData
-                                    });
-                                } finally {
-                                    xref.resetNewTemporaryRef();
+                                    ensureNotTerminated();
+                                    if (done) {
+                                        if (!newPdfManager) {
+                                            flushChunks();
+                                        }
+                                        cancelXHRs = null;
+                                        return;
+                                    }
+                                    loaded += value.byteLength;
+                                    if (!fullRequest.isStreamingSupported) {
+                                        handler.send("DocProgress", {
+                                            loaded,
+                                            total: Math.max(loaded, fullRequest.contentLength || 0)
+                                        });
+                                    }
+                                    if (newPdfManager) {
+                                        newPdfManager.sendProgressiveData(value);
+                                    } else {
+                                        cachedChunks.push(value);
+                                    }
+                                    fullRequest.read().then(readChunk, reject);
+                                } catch (e) {
+                                    reject(e);
                                 }
-                            });
+                            };
+                            fullRequest.read().then(readChunk, reject);
+                        }).catch(function (e) {
+                            pdfManagerCapability.reject(e);
+                            cancelXHRs = null;
                         });
-                        handler.on("GetOperatorList", function (data, sink) {
-                            const pageIndex = data.pageIndex;
-                            pdfManager.getPage(pageIndex).then(function (page) {
-                                const task = new WorkerTask(`GetOperatorList: page ${pageIndex}`);
+                        cancelXHRs = function (reason) {
+                            pdfStream.cancelAllRequests(reason);
+                        };
+                        return pdfManagerCapability.promise;
+                    }
+                    function setupDoc(data) {
+                        function onSuccess(doc) {
+                            ensureNotTerminated();
+                            handler.send("GetDoc", {
+                                pdfInfo: doc
+                            });
+                        }
+                        function onFailure(ex) {
+                            ensureNotTerminated();
+                            if (ex instanceof _util.PasswordException) {
+                                const task = new WorkerTask(`PasswordException: response ${ex.code}`);
                                 startWorkerTask(task);
-                                const start = verbosity >= _util.VerbosityLevel.INFOS ? Date.now() : 0;
-                                page.getOperatorList({
-                                    handler,
-                                    sink,
-                                    task,
-                                    intent: data.intent,
-                                    cacheKey: data.cacheKey,
-                                    annotationStorage: data.annotationStorage
-                                }).then(function (operatorListInfo) {
+                                handler.sendWithPromise("PasswordRequest", ex).then(function ({
+                                    password
+                                }) {
                                     finishWorkerTask(task);
-                                    if (start) {
-                                        (0, _util.info)(`page=${pageIndex + 1} - getOperatorList: time=` + `${Date.now() - start}ms, len=${operatorListInfo.length}`);
-                                    }
-                                    sink.close();
-                                }, function (reason) {
+                                    pdfManager.updatePassword(password);
+                                    pdfManagerReady();
+                                }).catch(function () {
                                     finishWorkerTask(task);
-                                    if (task.terminated) {
-                                        return;
-                                    }
-                                    sink.error(reason);
+                                    handler.send("DocException", ex);
                                 });
-                            });
-                        });
-                        handler.on("GetTextContent", function (data, sink) {
-                            const pageIndex = data.pageIndex;
-                            pdfManager.getPage(pageIndex).then(function (page) {
-                                const task = new WorkerTask("GetTextContent: page " + pageIndex);
-                                startWorkerTask(task);
-                                const start = verbosity >= _util.VerbosityLevel.INFOS ? Date.now() : 0;
-                                page.extractTextContent({
-                                    handler,
-                                    task,
-                                    sink,
-                                    includeMarkedContent: data.includeMarkedContent,
-                                    combineTextItems: data.combineTextItems
-                                }).then(function () {
-                                    finishWorkerTask(task);
-                                    if (start) {
-                                        (0, _util.info)(`page=${pageIndex + 1} - getTextContent: time=` + `${Date.now() - start}ms`);
-                                    }
-                                    sink.close();
-                                }, function (reason) {
-                                    finishWorkerTask(task);
-                                    if (task.terminated) {
-                                        return;
-                                    }
-                                    sink.error(reason);
-                                });
-                            });
-                        });
-                        handler.on("GetStructTree", function (data) {
-                            return pdfManager.getPage(data.pageIndex).then(function (page) {
-                                return pdfManager.ensure(page, "getStructTree");
-                            });
-                        });
-                        handler.on("FontFallback", function (data) {
-                            return pdfManager.fontFallback(data.id, handler);
-                        });
-                        handler.on("Cleanup", function (data) {
-                            return pdfManager.cleanup(true);
-                        });
-                        handler.on("Terminate", function (data) {
-                            terminated = true;
-                            const waitOn = [];
-                            if (pdfManager) {
-                                pdfManager.terminate(new _util.AbortException("Worker was terminated."));
-                                const cleanupPromise = pdfManager.cleanup();
-                                waitOn.push(cleanupPromise);
-                                pdfManager = null;
+                            } else if (ex instanceof _util.InvalidPDFException || ex instanceof _util.MissingPDFException || ex instanceof _util.UnexpectedResponseException || ex instanceof _util.UnknownErrorException) {
+                                handler.send("DocException", ex);
                             } else {
-                                (0, _cleanup_helper.clearGlobalCaches)();
+                                handler.send("DocException", new _util.UnknownErrorException(ex.message, ex.toString()));
                             }
-                            if (cancelXHRs) {
-                                cancelXHRs(new _util.AbortException("Worker was terminated."));
+                        }
+                        function pdfManagerReady() {
+                            ensureNotTerminated();
+                            loadDocument(false).then(onSuccess, function (reason) {
+                                ensureNotTerminated();
+                                if (!(reason instanceof _core_utils.XRefParseException)) {
+                                    onFailure(reason);
+                                    return;
+                                }
+                                pdfManager.requestLoadedStream().then(function () {
+                                    ensureNotTerminated();
+                                    loadDocument(true).then(onSuccess, onFailure);
+                                });
+                            });
+                        }
+                        ensureNotTerminated();
+                        getPdfManager(data).then(function (newPdfManager) {
+                            if (terminated) {
+                                newPdfManager.terminate(new _util.AbortException("Worker was terminated."));
+                                throw new Error("Worker was terminated");
                             }
-                            for (const task of WorkerTasks) {
-                                waitOn.push(task.finished);
-                                task.terminate();
-                            }
-                            return Promise.all(waitOn).then(function () {
-                                handler.destroy();
-                                handler = null;
+                            pdfManager = newPdfManager;
+                            pdfManager.requestLoadedStream(true).then(stream => {
+                                handler.send("DataLoaded", {
+                                    length: stream.bytes.byteLength
+                                });
+                            });
+                        }).then(pdfManagerReady, onFailure);
+                    }
+                    handler.on("GetPage", function (data) {
+                        return pdfManager.getPage(data.pageIndex).then(function (page) {
+                            return Promise.all([pdfManager.ensure(page, "rotate"), pdfManager.ensure(page, "ref"), pdfManager.ensure(page, "userUnit"), pdfManager.ensure(page, "view")]).then(function ([rotate, ref, userUnit, view]) {
+                                return {
+                                    rotate,
+                                    ref,
+                                    userUnit,
+                                    view
+                                };
                             });
                         });
-                        handler.on("Ready", function (data) {
-                            setupDoc(docParams);
-                            docParams = null;
+                    });
+                    handler.on("GetPageIndex", function (data) {
+                        const pageRef = _primitives.Ref.get(data.num, data.gen);
+                        return pdfManager.ensureCatalog("getPageIndex", [pageRef]);
+                    });
+                    handler.on("GetDestinations", function (data) {
+                        return pdfManager.ensureCatalog("destinations");
+                    });
+                    handler.on("GetDestination", function (data) {
+                        return pdfManager.ensureCatalog("getDestination", [data.id]);
+                    });
+                    handler.on("GetPageLabels", function (data) {
+                        return pdfManager.ensureCatalog("pageLabels");
+                    });
+                    handler.on("GetPageLayout", function (data) {
+                        return pdfManager.ensureCatalog("pageLayout");
+                    });
+                    handler.on("GetPageMode", function (data) {
+                        return pdfManager.ensureCatalog("pageMode");
+                    });
+                    handler.on("GetViewerPreferences", function (data) {
+                        return pdfManager.ensureCatalog("viewerPreferences");
+                    });
+                    handler.on("GetOpenAction", function (data) {
+                        return pdfManager.ensureCatalog("openAction");
+                    });
+                    handler.on("GetAttachments", function (data) {
+                        return pdfManager.ensureCatalog("attachments");
+                    });
+                    handler.on("GetJavaScript", function (data) {
+                        return pdfManager.ensureCatalog("javaScript");
+                    });
+                    handler.on("GetDocJSActions", function (data) {
+                        return pdfManager.ensureCatalog("jsActions");
+                    });
+                    handler.on("GetPageJSActions", function ({
+                        pageIndex
+                    }) {
+                        return pdfManager.getPage(pageIndex).then(function (page) {
+                            return pdfManager.ensure(page, "jsActions");
                         });
-                        return workerHandlerName;
-                    }
-                    static initializeFromPort(port) {
-                        const handler = new _message_handler.MessageHandler("worker", "main", port);
-                        WorkerMessageHandler.setup(handler, port);
-                        handler.send("ready", null);
-                    }
+                    });
+                    handler.on("GetOutline", function (data) {
+                        return pdfManager.ensureCatalog("documentOutline");
+                    });
+                    handler.on("GetOptionalContentConfig", function (data) {
+                        return pdfManager.ensureCatalog("optionalContentConfig");
+                    });
+                    handler.on("GetPermissions", function (data) {
+                        return pdfManager.ensureCatalog("permissions");
+                    });
+                    handler.on("GetMetadata", function (data) {
+                        return Promise.all([pdfManager.ensureDoc("documentInfo"), pdfManager.ensureCatalog("metadata")]);
+                    });
+                    handler.on("GetMarkInfo", function (data) {
+                        return pdfManager.ensureCatalog("markInfo");
+                    });
+                    handler.on("GetData", function (data) {
+                        return pdfManager.requestLoadedStream().then(function (stream) {
+                            return stream.bytes;
+                        });
+                    });
+                    handler.on("GetAnnotations", function ({
+                        pageIndex,
+                        intent
+                    }) {
+                        return pdfManager.getPage(pageIndex).then(function (page) {
+                            const task = new WorkerTask(`GetAnnotations: page ${pageIndex}`);
+                            startWorkerTask(task);
+                            return page.getAnnotationsData(handler, task, intent).then(data => {
+                                finishWorkerTask(task);
+                                return data;
+                            }, reason => {
+                                finishWorkerTask(task);
+                                throw reason;
+                            });
+                        });
+                    });
+                    handler.on("GetFieldObjects", function (data) {
+                        return pdfManager.ensureDoc("fieldObjects");
+                    });
+                    handler.on("HasJSActions", function (data) {
+                        return pdfManager.ensureDoc("hasJSActions");
+                    });
+                    handler.on("GetCalculationOrderIds", function (data) {
+                        return pdfManager.ensureDoc("calculationOrderIds");
+                    });
+                    handler.on("SaveDocument", function ({
+                        isPureXfa,
+                        numPages,
+                        annotationStorage,
+                        filename
+                    }) {
+                        const promises = [pdfManager.requestLoadedStream(), pdfManager.ensureCatalog("acroForm"), pdfManager.ensureCatalog("acroFormRef"), pdfManager.ensureDoc("xref"), pdfManager.ensureDoc("startXRef")];
+                        const newAnnotationsByPage = !isPureXfa ? (0, _core_utils.getNewAnnotationsMap)(annotationStorage) : null;
+                        if (newAnnotationsByPage) {
+                            for (const [pageIndex, annotations] of newAnnotationsByPage) {
+                                promises.push(pdfManager.getPage(pageIndex).then(page => {
+                                    const task = new WorkerTask(`Save (editor): page ${pageIndex}`);
+                                    return page.saveNewAnnotations(handler, task, annotations).finally(function () {
+                                        finishWorkerTask(task);
+                                    });
+                                }));
+                            }
+                        }
+                        if (isPureXfa) {
+                            promises.push(pdfManager.serializeXfaData(annotationStorage));
+                        } else {
+                            for (let pageIndex = 0; pageIndex < numPages; pageIndex++) {
+                                promises.push(pdfManager.getPage(pageIndex).then(function (page) {
+                                    const task = new WorkerTask(`Save: page ${pageIndex}`);
+                                    return page.save(handler, task, annotationStorage).finally(function () {
+                                        finishWorkerTask(task);
+                                    });
+                                }));
+                            }
+                        }
+                        return Promise.all(promises).then(function ([stream, acroForm, acroFormRef, xref, startXRef, ...refs]) {
+                            let newRefs = [];
+                            let xfaData = null;
+                            if (isPureXfa) {
+                                xfaData = refs[0];
+                                if (!xfaData) {
+                                    return stream.bytes;
+                                }
+                            } else {
+                                newRefs = refs.flat(2);
+                                if (newRefs.length === 0) {
+                                    return stream.bytes;
+                                }
+                            }
+                            const needAppearances = acroFormRef && acroForm instanceof _primitives.Dict && newRefs.some(ref => ref.needAppearances);
+                            const xfa = acroForm instanceof _primitives.Dict && acroForm.get("XFA") || null;
+                            let xfaDatasetsRef = null;
+                            let hasXfaDatasetsEntry = false;
+                            if (Array.isArray(xfa)) {
+                                for (let i = 0, ii = xfa.length; i < ii; i += 2) {
+                                    if (xfa[i] === "datasets") {
+                                        xfaDatasetsRef = xfa[i + 1];
+                                        hasXfaDatasetsEntry = true;
+                                    }
+                                }
+                                if (xfaDatasetsRef === null) {
+                                    xfaDatasetsRef = xref.getNewTemporaryRef();
+                                }
+                            } else if (xfa) {
+                                (0, _util.warn)("Unsupported XFA type.");
+                            }
+                            let newXrefInfo = Object.create(null);
+                            if (xref.trailer) {
+                                const infoObj = Object.create(null);
+                                const xrefInfo = xref.trailer.get("Info") || null;
+                                if (xrefInfo instanceof _primitives.Dict) {
+                                    xrefInfo.forEach((key, value) => {
+                                        if (typeof value === "string") {
+                                            infoObj[key] = (0, _util.stringToPDFString)(value);
+                                        }
+                                    });
+                                }
+                                newXrefInfo = {
+                                    rootRef: xref.trailer.getRaw("Root") || null,
+                                    encryptRef: xref.trailer.getRaw("Encrypt") || null,
+                                    newRef: xref.getNewTemporaryRef(),
+                                    infoRef: xref.trailer.getRaw("Info") || null,
+                                    info: infoObj,
+                                    fileIds: xref.trailer.get("ID") || null,
+                                    startXRef,
+                                    filename
+                                };
+                            }
+                            try {
+                                return (0, _writer.incrementalUpdate)({
+                                    originalData: stream.bytes,
+                                    xrefInfo: newXrefInfo,
+                                    newRefs,
+                                    xref,
+                                    hasXfa: !!xfa,
+                                    xfaDatasetsRef,
+                                    hasXfaDatasetsEntry,
+                                    needAppearances,
+                                    acroFormRef,
+                                    acroForm,
+                                    xfaData
+                                });
+                            } finally {
+                                xref.resetNewTemporaryRef();
+                            }
+                        });
+                    });
+                    handler.on("GetOperatorList", function (data, sink) {
+                        const pageIndex = data.pageIndex;
+                        pdfManager.getPage(pageIndex).then(function (page) {
+                            const task = new WorkerTask(`GetOperatorList: page ${pageIndex}`);
+                            startWorkerTask(task);
+                            const start = verbosity >= _util.VerbosityLevel.INFOS ? Date.now() : 0;
+                            page.getOperatorList({
+                                handler,
+                                sink,
+                                task,
+                                intent: data.intent,
+                                cacheKey: data.cacheKey,
+                                annotationStorage: data.annotationStorage
+                            }).then(function (operatorListInfo) {
+                                finishWorkerTask(task);
+                                if (start) {
+                                    (0, _util.info)(`page=${pageIndex + 1} - getOperatorList: time=` + `${Date.now() - start}ms, len=${operatorListInfo.length}`);
+                                }
+                                sink.close();
+                            }, function (reason) {
+                                finishWorkerTask(task);
+                                if (task.terminated) {
+                                    return;
+                                }
+                                sink.error(reason);
+                            });
+                        });
+                    });
+                    handler.on("GetTextContent", function (data, sink) {
+                        const pageIndex = data.pageIndex;
+                        pdfManager.getPage(pageIndex).then(function (page) {
+                            const task = new WorkerTask("GetTextContent: page " + pageIndex);
+                            startWorkerTask(task);
+                            const start = verbosity >= _util.VerbosityLevel.INFOS ? Date.now() : 0;
+                            page.extractTextContent({
+                                handler,
+                                task,
+                                sink,
+                                includeMarkedContent: data.includeMarkedContent,
+                                combineTextItems: data.combineTextItems
+                            }).then(function () {
+                                finishWorkerTask(task);
+                                if (start) {
+                                    (0, _util.info)(`page=${pageIndex + 1} - getTextContent: time=` + `${Date.now() - start}ms`);
+                                }
+                                sink.close();
+                            }, function (reason) {
+                                finishWorkerTask(task);
+                                if (task.terminated) {
+                                    return;
+                                }
+                                sink.error(reason);
+                            });
+                        });
+                    });
+                    handler.on("GetStructTree", function (data) {
+                        return pdfManager.getPage(data.pageIndex).then(function (page) {
+                            return pdfManager.ensure(page, "getStructTree");
+                        });
+                    });
+                    handler.on("FontFallback", function (data) {
+                        return pdfManager.fontFallback(data.id, handler);
+                    });
+                    handler.on("Cleanup", function (data) {
+                        return pdfManager.cleanup(true);
+                    });
+                    handler.on("Terminate", function (data) {
+                        terminated = true;
+                        const waitOn = [];
+                        if (pdfManager) {
+                            pdfManager.terminate(new _util.AbortException("Worker was terminated."));
+                            const cleanupPromise = pdfManager.cleanup();
+                            waitOn.push(cleanupPromise);
+                            pdfManager = null;
+                        } else {
+                            (0, _cleanup_helper.clearGlobalCaches)();
+                        }
+                        if (cancelXHRs) {
+                            cancelXHRs(new _util.AbortException("Worker was terminated."));
+                        }
+                        for (const task of WorkerTasks) {
+                            waitOn.push(task.finished);
+                            task.terminate();
+                        }
+                        return Promise.all(waitOn).then(function () {
+                            handler.destroy();
+                            handler = null;
+                        });
+                    });
+                    handler.on("Ready", function (data) {
+                        setupDoc(docParams);
+                        docParams = null;
+                    });
+                    return workerHandlerName;
                 }
-                exports.WorkerMessageHandler = WorkerMessageHandler;
-                function isMessagePort(maybePort) {
-                    return typeof maybePort.postMessage === "function" && "onmessage" in maybePort;
+                static initializeFromPort(port) {
+                    const handler = new _message_handler.MessageHandler("worker", "main", port);
+                    WorkerMessageHandler.setup(handler, port);
+                    handler.send("ready", null);
                 }
-                if (typeof window === "undefined" && !_is_node.isNodeJS && typeof self !== "undefined" && isMessagePort(self)) {
-                    WorkerMessageHandler.initializeFromPort(self);
-                }
-
-                /***/
-}),
-/* 2 */
-/***/ ((__unused_webpack_module, exports) => {
-
-
-
+            }
+            exports.WorkerMessageHandler = WorkerMessageHandler;
+            function isMessagePort(maybePort) {
+                return typeof maybePort.postMessage === "function" && "onmessage" in maybePort;
+            }
+            if (typeof window === "undefined" && !_is_node.isNodeJS && typeof self !== "undefined" && isMessagePort(self)) {
+                WorkerMessageHandler.initializeFromPort(self);
+            }
+        }),((__unused_webpack_module, exports) => {
                 Object.defineProperty(exports, "__esModule", ({
                     value: true
                 }));
@@ -1453,10 +1418,10 @@
                     return capability;
                 }
 
-                /***/
-}),
-/* 3 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -1907,10 +1872,10 @@
                     }
                 }
 
-                /***/
-}),
-/* 4 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -2185,10 +2150,10 @@
                     Ref._clearCache();
                 }
 
-                /***/
-}),
-/* 5 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -2269,10 +2234,10 @@
                 }
                 exports.BaseStream = BaseStream;
 
-                /***/
-}),
-/* 6 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -2428,10 +2393,10 @@
                 }
                 exports.NetworkPdfManager = NetworkPdfManager;
 
-                /***/
-}),
-/* 7 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -2871,10 +2836,10 @@
                 }
                 exports.ChunkedStreamManager = ChunkedStreamManager;
 
-                /***/
-}),
-/* 8 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -2952,10 +2917,10 @@
                 }
                 exports.NullStream = NullStream;
 
-                /***/
-}),
-/* 9 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -4222,10 +4187,10 @@
                 }
                 exports.PDFDocument = PDFDocument;
 
-                /***/
-}),
-/* 10 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -7129,10 +7094,10 @@
                     }
                 }
 
-                /***/
-}),
-/* 11 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -7429,10 +7394,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.FakeUnicodeFont = FakeUnicodeFont;
 
-                /***/
-}),
-/* 12 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -8299,10 +8264,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return LabCS;
                 }();
 
-                /***/
-}),
-/* 13 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -12114,10 +12079,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.EvaluatorPreprocessor = EvaluatorPreprocessor;
 
-                /***/
-}),
-/* 14 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -12834,10 +12799,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }();
                 exports.CMapFactory = CMapFactory;
 
-                /***/
-}),
-/* 15 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -13909,10 +13874,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Linearization = Linearization;
 
-                /***/
-}),
-/* 16 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -13987,10 +13952,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Ascii85Stream = Ascii85Stream;
 
-                /***/
-}),
-/* 17 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -14134,10 +14099,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.StreamsSequenceStream = StreamsSequenceStream;
 
-                /***/
-}),
-/* 18 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -14196,10 +14161,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.AsciiHexStream = AsciiHexStream;
 
-                /***/
-}),
-/* 19 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -14247,10 +14212,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.CCITTFaxStream = CCITTFaxStream;
 
-                /***/
-}),
-/* 20 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -14780,10 +14745,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.CCITTFaxDecoder = CCITTFaxDecoder;
 
-                /***/
-}),
-/* 21 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -15029,10 +14994,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.FlateStream = FlateStream;
 
-                /***/
-}),
-/* 22 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -15091,10 +15056,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Jbig2Stream = Jbig2Stream;
 
-                /***/
-}),
-/* 23 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -16843,10 +16808,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Jbig2Image = Jbig2Image;
 
-                /***/
-}),
-/* 24 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -17180,10 +17145,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.ArithmeticDecoder = ArithmeticDecoder;
 
-                /***/
-}),
-/* 25 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -17261,10 +17226,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.JpegStream = JpegStream;
 
-                /***/
-}),
-/* 26 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -18292,10 +18257,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.JpegImage = JpegImage;
 
-                /***/
-}),
-/* 27 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -18358,10 +18323,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.JpxStream = JpxStream;
 
-                /***/
-}),
-/* 28 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -20287,10 +20252,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     }
                 }
 
-                /***/
-}),
-/* 29 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -20415,10 +20380,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.LZWStream = LZWStream;
 
-                /***/
-}),
-/* 30 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -20617,10 +20582,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.PredictorStream = PredictorStream;
 
-                /***/
-}),
-/* 31 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -20665,10 +20630,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.RunLengthStream = RunLengthStream;
 
-                /***/
-}),
-/* 32 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -23090,10 +23055,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.ErrorFont = ErrorFont;
 
-                /***/
-}),
-/* 33 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -24583,10 +24548,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.CFFCompiler = CFFCompiler;
 
-                /***/
-}),
-/* 34 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -24601,10 +24566,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 const ExpertSubsetCharset = [".notdef", "space", "dollaroldstyle", "dollarsuperior", "parenleftsuperior", "parenrightsuperior", "twodotenleader", "onedotenleader", "comma", "hyphen", "period", "fraction", "zerooldstyle", "oneoldstyle", "twooldstyle", "threeoldstyle", "fouroldstyle", "fiveoldstyle", "sixoldstyle", "sevenoldstyle", "eightoldstyle", "nineoldstyle", "colon", "semicolon", "commasuperior", "threequartersemdash", "periodsuperior", "asuperior", "bsuperior", "centsuperior", "dsuperior", "esuperior", "isuperior", "lsuperior", "msuperior", "nsuperior", "osuperior", "rsuperior", "ssuperior", "tsuperior", "ff", "fi", "fl", "ffi", "ffl", "parenleftinferior", "parenrightinferior", "hyphensuperior", "colonmonetary", "onefitted", "rupiah", "centoldstyle", "figuredash", "hypheninferior", "onequarter", "onehalf", "threequarters", "oneeighth", "threeeighths", "fiveeighths", "seveneighths", "onethird", "twothirds", "zerosuperior", "onesuperior", "twosuperior", "threesuperior", "foursuperior", "fivesuperior", "sixsuperior", "sevensuperior", "eightsuperior", "ninesuperior", "zeroinferior", "oneinferior", "twoinferior", "threeinferior", "fourinferior", "fiveinferior", "sixinferior", "seveninferior", "eightinferior", "nineinferior", "centinferior", "dollarinferior", "periodinferior", "commainferior"];
                 exports.ExpertSubsetCharset = ExpertSubsetCharset;
 
-                /***/
-}),
-/* 35 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -24647,10 +24612,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     }
                 }
 
-                /***/
-}),
-/* 36 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -24763,18 +24728,18 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return name.replace(/[,_]/g, "-").replace(/\s/g, "");
                 }
 
-                /***/
-}),
-/* 37 */
-/***/ ((__unused_webpack_module, __webpack_exports__, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, __webpack_exports__, __w_pdfjs_require__) => {
 
                 __w_pdfjs_require__.r(__webpack_exports__);
-/* harmony export */ __w_pdfjs_require__.d(__webpack_exports__, {
-/* harmony export */   "getDingbatsGlyphsUnicode": () => (/* binding */ getDingbatsGlyphsUnicode),
-/* harmony export */   "getGlyphsUnicode": () => (/* binding */ getGlyphsUnicode)
-                    /* harmony export */
-});
-/* harmony import */ var _core_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __w_pdfjs_require__(3);
+ __w_pdfjs_require__.d(__webpack_exports__, {
+   "getDingbatsGlyphsUnicode": () => ( getDingbatsGlyphsUnicode),
+   "getGlyphsUnicode": () => ( getGlyphsUnicode)
+                    
+                });
+ var _core_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __w_pdfjs_require__(3);
 
                 const getGlyphsUnicode = (0, _core_utils_js__WEBPACK_IMPORTED_MODULE_0__.getArrayLookupTableFactory)(function () {
                     return [
@@ -33844,23 +33809,23 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 });
 
 
-                /***/
-}),
-/* 38 */
-/***/ ((__unused_webpack_module, __webpack_exports__, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, __webpack_exports__, __w_pdfjs_require__) => {
 
                 __w_pdfjs_require__.r(__webpack_exports__);
-/* harmony export */ __w_pdfjs_require__.d(__webpack_exports__, {
-/* harmony export */   "clearUnicodeCaches": () => (/* binding */ clearUnicodeCaches),
-/* harmony export */   "getCharUnicodeCategory": () => (/* binding */ getCharUnicodeCategory),
-/* harmony export */   "getNormalizedUnicodes": () => (/* binding */ getNormalizedUnicodes),
-/* harmony export */   "getUnicodeForGlyph": () => (/* binding */ getUnicodeForGlyph),
-/* harmony export */   "getUnicodeRangeFor": () => (/* binding */ getUnicodeRangeFor),
-/* harmony export */   "mapSpecialUnicodeValues": () => (/* binding */ mapSpecialUnicodeValues),
-/* harmony export */   "reverseIfRtl": () => (/* binding */ reverseIfRtl)
-                    /* harmony export */
-});
-/* harmony import */ var _core_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __w_pdfjs_require__(3);
+ __w_pdfjs_require__.d(__webpack_exports__, {
+   "clearUnicodeCaches": () => ( clearUnicodeCaches),
+   "getCharUnicodeCategory": () => ( getCharUnicodeCategory),
+   "getNormalizedUnicodes": () => ( getNormalizedUnicodes),
+   "getUnicodeForGlyph": () => ( getUnicodeForGlyph),
+   "getUnicodeRangeFor": () => ( getUnicodeRangeFor),
+   "mapSpecialUnicodeValues": () => ( mapSpecialUnicodeValues),
+   "reverseIfRtl": () => ( reverseIfRtl)
+                    
+                });
+ var _core_utils_js__WEBPACK_IMPORTED_MODULE_0__ = __w_pdfjs_require__(3);
 
                 const getSpecialPUASymbols = (0, _core_utils_js__WEBPACK_IMPORTED_MODULE_0__.getLookupTableFactory)(function (t) {
                     t[63721] = 0x00a9;
@@ -37229,10 +37194,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
 
 
-                /***/
-}),
-/* 39 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -38091,10 +38056,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return stdFontMap[fontName];
                 }
 
-                /***/
-}),
-/* 40 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -38171,10 +38136,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.IdentityToUnicodeMap = IdentityToUnicodeMap;
 
-                /***/
-}),
-/* 41 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -38284,10 +38249,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.CFFFont = CFFFont;
 
-                /***/
-}),
-/* 42 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -39102,10 +39067,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.FontRendererFactory = FontRendererFactory;
 
-                /***/
-}),
-/* 43 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -42141,10 +42106,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 });
                 exports.getFontBasicMetrics = getFontBasicMetrics;
 
-                /***/
-}),
-/* 44 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -42687,10 +42652,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     scale(x, factor) { }
                 }
 
-                /***/
-}),
-/* 45 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -42804,10 +42769,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.OpenTypeFileBuilder = OpenTypeFileBuilder;
 
-                /***/
-}),
-/* 46 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -43091,10 +43056,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Type1Font = Type1Font;
 
-                /***/
-}),
-/* 47 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -43667,10 +43632,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Type1Parser = Type1Parser;
 
-                /***/
-}),
-/* 48 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -44455,10 +44420,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return ["TilingPattern", color, operatorList, matrix, bbox, xstep, ystep, paintType, tilingType];
                 }
 
-                /***/
-}),
-/* 49 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -44669,10 +44634,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return dict;
                 }
 
-                /***/
-}),
-/* 50 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -44709,10 +44674,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 };
                 exports.CalibriRegularMetrics = CalibriRegularMetrics;
 
-                /***/
-}),
-/* 51 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -44749,10 +44714,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 };
                 exports.HelveticaRegularMetrics = HelveticaRegularMetrics;
 
-                /***/
-}),
-/* 52 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -44777,10 +44742,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 const LiberationSansRegularMapping = [-1, -1, -1, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85, 86, 87, 88, 89, 90, 91, 92, 93, 94, 95, 96, 97, 98, 99, 100, 101, 102, 103, 104, 105, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 161, 162, 163, 164, 165, 166, 167, 168, 169, 170, 171, 172, 174, 175, 176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 186, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196, 197, 198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 208, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218, 219, 220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 230, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255, 256, 257, 258, 259, 260, 261, 262, 263, 264, 265, 266, 267, 268, 269, 270, 271, 272, 273, 274, 275, 276, 277, 278, 279, 280, 281, 282, 283, 284, 285, 286, 287, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298, 299, 300, 301, 302, 303, 304, 305, 306, 307, 308, 309, 310, 311, 312, 313, 314, 315, 316, 317, 318, 319, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 330, 331, 332, 333, 334, 335, 336, 337, 338, 339, 340, 341, 342, 343, 344, 345, 346, 347, 348, 349, 350, 351, 352, 353, 354, 355, 356, 357, 358, 359, 360, 361, 362, 363, 364, 365, 366, 367, 368, 369, 370, 371, 372, 373, 374, 375, 376, 377, 378, 379, 380, 381, 382, 383, 402, 506, 507, 508, 509, 510, 511, 536, 537, 538, 539, 710, 711, 713, 728, 729, 730, 731, 732, 733, 900, 901, 902, 903, 904, 905, 906, 908, 910, 911, 912, 913, 914, 915, 916, 917, 918, 919, 920, 921, 922, 923, 924, 925, 926, 927, 928, 929, 931, 932, 933, 934, 935, 936, 937, 938, 939, 940, 941, 942, 943, 944, 945, 946, 947, 948, 949, 950, 951, 952, 953, 954, 955, 956, 957, 958, 959, 960, 961, 962, 963, 964, 965, 966, 967, 968, 969, 970, 971, 972, 973, 974, 1024, 1025, 1026, 1027, 1028, 1029, 1030, 1031, 1032, 1033, 1034, 1035, 1036, 1037, 1038, 1039, 1040, 1041, 1042, 1043, 1044, 1045, 1046, 1047, 1048, 1049, 1050, 1051, 1052, 1053, 1054, 1055, 1056, 1057, 1058, 1059, 1060, 1061, 1062, 1063, 1064, 1065, 1066, 1067, 1068, 1069, 1070, 1071, 1072, 1073, 1074, 1075, 1076, 1077, 1078, 1079, 1080, 1081, 1082, 1083, 1084, 1085, 1086, 1087, 1088, 1089, 1090, 1091, 1092, 1093, 1094, 1095, 1096, 1097, 1098, 1099, 1100, 1101, 1102, 1103, 1104, 1105, 1106, 1107, 1108, 1109, 1110, 1111, 1112, 1113, 1114, 1115, 1116, 1117, 1118, 1119, 1138, 1139, 1168, 1169, 7808, 7809, 7810, 7811, 7812, 7813, 7922, 7923, 8208, 8209, 8211, 8212, 8213, 8215, 8216, 8217, 8218, 8219, 8220, 8221, 8222, 8224, 8225, 8226, 8230, 8240, 8242, 8243, 8249, 8250, 8252, 8254, 8260, 8319, 8355, 8356, 8359, 8364, 8453, 8467, 8470, 8482, 8486, 8494, 8539, 8540, 8541, 8542, 8592, 8593, 8594, 8595, 8596, 8597, 8616, 8706, 8710, 8719, 8721, 8722, 8730, 8734, 8735, 8745, 8747, 8776, 8800, 8801, 8804, 8805, 8962, 8976, 8992, 8993, 9472, 9474, 9484, 9488, 9492, 9496, 9500, 9508, 9516, 9524, 9532, 9552, 9553, 9554, 9555, 9556, 9557, 9558, 9559, 9560, 9561, 9562, 9563, 9564, 9565, 9566, 9567, 9568, 9569, 9570, 9571, 9572, 9573, 9574, 9575, 9576, 9577, 9578, 9579, 9580, 9600, 9604, 9608, 9612, 9616, 9617, 9618, 9619, 9632, 9633, 9642, 9643, 9644, 9650, 9658, 9660, 9668, 9674, 9675, 9679, 9688, 9689, 9702, 9786, 9787, 9788, 9792, 9794, 9824, 9827, 9829, 9830, 9834, 9835, 9836, 61441, 61442, 61445, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1];
                 exports.LiberationSansRegularMapping = LiberationSansRegularMapping;
 
-                /***/
-}),
-/* 53 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -44817,10 +44782,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 };
                 exports.MyriadProRegularMetrics = MyriadProRegularMetrics;
 
-                /***/
-}),
-/* 54 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -44857,10 +44822,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 };
                 exports.SegoeuiRegularMetrics = SegoeuiRegularMetrics;
 
-                /***/
-}),
-/* 55 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -45910,10 +45875,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.PostScriptCompiler = PostScriptCompiler;
 
-                /***/
-}),
-/* 56 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -46115,10 +46080,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.PostScriptLexer = PostScriptLexer;
 
-                /***/
-}),
-/* 57 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -46349,10 +46314,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.GlobalImageCache = GlobalImageCache;
 
-                /***/
-}),
-/* 58 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -46597,10 +46562,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return createBidiText(chars.join(""), isLTR);
                 }
 
-                /***/
-}),
-/* 59 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -46702,10 +46667,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.MurmurHash3_64 = MurmurHash3_64;
 
-                /***/
-}),
-/* 60 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -47229,10 +47194,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.OperatorList = OperatorList;
 
-                /***/
-}),
-/* 61 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -47857,10 +47822,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.PDFImage = PDFImage;
 
-                /***/
-}),
-/* 62 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -47910,10 +47875,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     };
                 }
 
-                /***/
-}),
-/* 63 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -48227,10 +48192,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return array;
                 }
 
-                /***/
-}),
-/* 64 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -48656,10 +48621,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.SimpleXMLParser = SimpleXMLParser;
 
-                /***/
-}),
-/* 65 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -49966,10 +49931,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }();
                 exports.CipherTransformFactory = CipherTransformFactory;
 
-                /***/
-}),
-/* 66 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -50013,10 +49978,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.DecryptStream = DecryptStream;
 
-                /***/
-}),
-/* 67 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -51352,10 +51317,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Catalog = Catalog;
 
-                /***/
-}),
-/* 68 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -51481,10 +51446,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.NumberTree = NumberTree;
 
-                /***/
-}),
-/* 69 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -51499,10 +51464,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     (0, _unicode.clearUnicodeCaches)();
                 }
 
-                /***/
-}),
-/* 70 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -51583,10 +51548,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.FileSpec = FileSpec;
 
-                /***/
-}),
-/* 71 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -51692,10 +51657,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.MetadataParser = MetadataParser;
 
-                /***/
-}),
-/* 72 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -51981,10 +51946,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.StructTreePage = StructTreePage;
 
-                /***/
-}),
-/* 73 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -52102,10 +52067,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.ObjectLoader = ObjectLoader;
 
-                /***/
-}),
-/* 74 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -52254,10 +52219,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.XFAFactory = XFAFactory;
 
-                /***/
-}),
-/* 75 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -53191,10 +53156,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Option10 = Option10;
 
-                /***/
-}),
-/* 76 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -53411,10 +53376,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.HTMLResult = HTMLResult;
 
-                /***/
-}),
-/* 77 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -53488,10 +53453,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 };
                 exports.NamespaceIds = NamespaceIds;
 
-                /***/
-}),
-/* 78 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -53761,10 +53726,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return null;
                 }
 
-                /***/
-}),
-/* 79 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -54196,10 +54161,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Binder = Binder;
 
-                /***/
-}),
-/* 80 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -59096,10 +59061,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.TemplateNamespace = TemplateNamespace;
 
-                /***/
-}),
-/* 81 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -59377,10 +59342,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     }
                 }
 
-                /***/
-}),
-/* 82 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -59923,10 +59888,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     return absoluteUrl ? absoluteUrl.href : null;
                 }
 
-                /***/
-}),
-/* 83 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -60089,10 +60054,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     };
                 }
 
-                /***/
-}),
-/* 84 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -60310,10 +60275,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.TextMeasure = TextMeasure;
 
-                /***/
-}),
-/* 85 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -60370,10 +60335,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.DataHandler = DataHandler;
 
-                /***/
-}),
-/* 86 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -60516,10 +60481,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.XFAParser = XFAParser;
 
-                /***/
-}),
-/* 87 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -60694,10 +60659,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.Builder = Builder;
 
-                /***/
-}),
-/* 88 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -60727,10 +60692,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 };
                 exports.NamespaceSetUp = NamespaceSetUp;
 
-                /***/
-}),
-/* 89 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62164,10 +62129,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.ConfigNamespace = ConfigNamespace;
 
-                /***/
-}),
-/* 90 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62336,10 +62301,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.ConnectionSetNamespace = ConnectionSetNamespace;
 
-                /***/
-}),
-/* 91 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62388,10 +62353,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.DatasetsNamespace = DatasetsNamespace;
 
-                /***/
-}),
-/* 92 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62647,10 +62612,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.LocaleSetNamespace = LocaleSetNamespace;
 
-                /***/
-}),
-/* 93 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62679,10 +62644,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.SignatureNamespace = SignatureNamespace;
 
-                /***/
-}),
-/* 94 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62711,10 +62676,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.StylesheetNamespace = StylesheetNamespace;
 
-                /***/
-}),
-/* 95 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -62755,10 +62720,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.XdpNamespace = XdpNamespace;
 
-                /***/
-}),
-/* 96 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -63172,10 +63137,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.XhtmlNamespace = XhtmlNamespace;
 
-                /***/
-}),
-/* 97 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -63195,10 +63160,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.UnknownNamespace = UnknownNamespace;
 
-                /***/
-}),
-/* 98 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -63263,10 +63228,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.DatasetReader = DatasetReader;
 
-                /***/
-}),
-/* 99 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -63992,10 +63957,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.XRef = XRef;
 
-                /***/
-}),
-/* 100 */
-/***/ ((__unused_webpack_module, exports) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports) => {
 
 
 
@@ -64006,10 +63971,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 const isNodeJS = typeof process === "object" && process + "" === "[object process]" && !process.versions.nw && !(process.versions.electron && process.type && process.type !== "browser");
                 exports.isNodeJS = isNodeJS;
 
-                /***/
-}),
-/* 101 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -64420,10 +64385,10 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                 }
                 exports.MessageHandler = MessageHandler;
 
-                /***/
-}),
-/* 102 */
-/***/ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
+                
+            }),
+
+ ((__unused_webpack_module, exports, __w_pdfjs_require__) => {
 
 
 
@@ -64540,77 +64505,63 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
                     }
                 }
 
-                /***/
-})
-/******/]);
-/************************************************************************/
-/******/ 	// The module cache
-/******/ 	var __webpack_module_cache__ = {};
-/******/
-/******/ 	// The require function
-/******/ 	function __w_pdfjs_require__(moduleId) {
-/******/ 		// Check if module is in cache
-/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
-/******/ 		if (cachedModule !== undefined) {
-/******/ 			return cachedModule.exports;
-                /******/
-}
-/******/ 		// Create a new module (and put it into the cache)
-/******/ 		var module = __webpack_module_cache__[moduleId] = {
-/******/ 			// no module.id needed
-/******/ 			// no module.loaded needed
-/******/ 			exports: {}
-                /******/
-};
-/******/
-/******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId](module, module.exports, __w_pdfjs_require__);
-/******/
-/******/ 		// Return the exports of the module
-/******/ 		return module.exports;
-            /******/
-}
-/******/
-/************************************************************************/
-/******/ 	/* webpack/runtime/define property getters */
-/******/ 	(() => {
-/******/ 		// define getter functions for harmony exports
-/******/ 		__w_pdfjs_require__.d = (exports, definition) => {
-/******/ 			for (var key in definition) {
-/******/ 				if (__w_pdfjs_require__.o(definition, key) && !__w_pdfjs_require__.o(exports, key)) {
-/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
-                        /******/
-}
-                    /******/
-}
-                /******/
-};
-            /******/
-})();
-/******/
-/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
-/******/ 	(() => {
-/******/ 		__w_pdfjs_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
-            /******/
-})();
-/******/
-/******/ 	/* webpack/runtime/make namespace object */
-/******/ 	(() => {
-/******/ 		// define __esModule on exports
-/******/ 		__w_pdfjs_require__.r = (exports) => {
-/******/ 			if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
-/******/ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
-                    /******/
-}
-/******/ 			Object.defineProperty(exports, '__esModule', { value: true });
-                /******/
-};
-            /******/
-})();
-        /******/
-        /************************************************************************/
+                
+            })
+]);
+
+var __webpack_module_cache__ = {};
+ 	function __w_pdfjs_require__(moduleId) {
+ 		var cachedModule = __webpack_module_cache__[moduleId];
+ 		if (cachedModule !== undefined) {
+ 			return cachedModule.exports;
+                
+            }
+ 		var module = __webpack_module_cache__[moduleId] = {
+ 			exports: {}
+                
+            };
+
+ 		// Execute the module function
+ 		__webpack_modules__[moduleId](module, module.exports, __w_pdfjs_require__);
+
+ 		return module.exports;
+            
+        }
+
+
+ 	
+ 	(() => {
+ 		__w_pdfjs_require__.d = (exports, definition) => {
+ 			for (var key in definition) {
+ 				if (__w_pdfjs_require__.o(definition, key) && !__w_pdfjs_require__.o(exports, key)) {
+ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+                        
+                    }
+                    
+                }
+                
+            };
+            
+        })();
+ 	(() => {
+ 		__w_pdfjs_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+            
+        })();
+
+ 	(() => {
+ 		__w_pdfjs_require__.r = (exports) => {
+ 			if (typeof Symbol !== 'undefined' && Symbol.toStringTag) {
+ 				Object.defineProperty(exports, Symbol.toStringTag, { value: 'Module' });
+                    
+                }
+ 			Object.defineProperty(exports, '__esModule', { value: true });
+                
+            };
+            
+        })();
+        
+        
         var __webpack_exports__ = {};
-        // This entry need to be wrapped in an IIFE because it need to be isolated against other modules in the chunk.
         (() => {
             var exports = __webpack_exports__;
 
@@ -64629,9 +64580,6 @@ endcmap CMapName currentdict /CMap defineresource pop end end`;
             const pdfjsBuild = 'af6414988';
         })();
 
-/******/ 	return __webpack_exports__;
-        /******/
-})()
-        ;
+        return __webpack_exports__;
+    })();
 });
-//# sourceMappingURL=pdf.worker.js.map
